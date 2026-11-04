@@ -6,6 +6,7 @@ import { setupApi } from "../../services/setupApi";
 import type { AiAccount, ReviewEngine } from "../../types";
 import { ACCOUNTS_QUERY_KEY, AccountsPanel, accountHealth, ProviderGlyph, providerName } from "./AccountsPanel";
 import { ENGINES_QUERY_KEY } from "./EnginePicker";
+import { OpencodeAccountModels } from "./OpencodeAccountModels";
 
 type Provider = AiAccount["provider"];
 const PROVIDERS: Provider[] = ["claude", "codex", "opencode"];
@@ -213,7 +214,7 @@ function ProviderDetail({
                 <div className="text-small font-medium text-fg">Model</div>
                 <div className="text-caption text-fg-subtle">
                   {provider === "opencode"
-                    ? "Each OpenCode account keeps its own model: a free model or your Go key's."
+                    ? "Each OpenCode account keeps its own model, from the ones OpenCode offers its key."
                     : "The model reviews run on with this provider."}
                 </div>
               </div>
@@ -239,6 +240,7 @@ function ProviderDetail({
                 </select>
               )}
             </div>
+            {provider === "opencode" && <OpencodeAccountModels accounts={accounts} />}
             {model && model.efforts.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                 <div>

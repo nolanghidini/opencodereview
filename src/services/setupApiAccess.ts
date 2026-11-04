@@ -4,6 +4,7 @@ import type {
   AiProvider,
   GitHubAuthStatus,
   IndexGraph,
+  OpencodeModels,
   Repo,
   RepoIndexStatus,
   ReviewEngine,
@@ -124,8 +125,18 @@ export const setupApiAccess = {
     return http<{ running: boolean }>("/auth/codex/cancel", { method: "POST", headers, body: JSON.stringify({}) });
   },
   /** Saves an OpenCode Go key, or the free models when `key` is left out. */
-  opencodeKeySave: (key?: string, accountId?: number) =>
+  opencodeKeySave: (key?: string, accountId?: number, model?: string) =>
     http<{ ok: boolean }>("/auth/opencode/key", {
+      method: "POST",
+      body: JSON.stringify({
+        ...(key ? { key } : {}),
+        ...(accountId ? { accountId } : {}),
+        ...(model ? { model } : {}),
+      }),
+    }),
+  /** The models a pasted Go key, a saved account or (with neither) the free plan may use. */
+  opencodeModels: (key?: string, accountId?: number) =>
+    http<OpencodeModels>("/auth/opencode/models", {
       method: "POST",
       body: JSON.stringify({ ...(key ? { key } : {}), ...(accountId ? { accountId } : {}) }),
     }),

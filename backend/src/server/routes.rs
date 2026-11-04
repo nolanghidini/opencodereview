@@ -32,6 +32,7 @@ pub(crate) fn route(request: Request, state: SharedState) -> Response {
         ("GET", "/auth/codex/events") => codex_auth_events(&request),
         ("POST", "/auth/codex/cancel") => cancel_codex_auth(&request),
         ("POST", "/auth/opencode/key") => save_opencode_key(&request, &state),
+        ("POST", "/auth/opencode/models") => opencode_models(&request, &state),
         ("GET", "/accounts") => list_accounts(&state),
         ("POST", "/accounts/order") => reorder_accounts(&request, &state),
         ("GET", "/review-engines") => review_engines(&state),
