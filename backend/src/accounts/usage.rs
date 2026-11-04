@@ -30,6 +30,7 @@ pub(crate) fn usage(id: i64, provider: &str) -> Value {
             }
         }),
         "codex" => codex(id),
+        "opencode" => Err("OpenCode doesn't share usage; check your OpenCode dashboard".to_string()),
         _ => Err("Unknown provider".to_string()),
     };
     let value = match windows {

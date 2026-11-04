@@ -89,8 +89,8 @@ pub fn normalize_model(raw: &str) -> String {
     }
 }
 
-/// Accumulates per-model token usage from Claude `result` events and Codex `turn.completed`
-/// events. Each Claude execution emits exactly one result whose `modelUsage` already totals
+/// Accumulates per-model token usage from Claude `result` events, Codex `turn.completed`
+/// events and OpenCode's `step_finish` events. Each Claude execution emits exactly one result whose `modelUsage` already totals
 /// every turn, so assistant messages are not summed again.
 pub fn collect_usage(value: &serde_json::Value, per_model: &mut std::collections::HashMap<String, ModelUsageEntry>) {
     let events = match value {
@@ -111,6 +111,22 @@ pub fn collect_usage(value: &serde_json::Value, per_model: &mut std::collections
         entry.input_tokens += (usage["input_tokens"].as_i64().unwrap_or(0) - cached).max(0);
         entry.cache_read_tokens += cached;
         entry.output_tokens += usage["output_tokens"].as_i64().unwrap_or(0);
+    }
+    // OpenCode reports each step's tokens when the step finishes; `input` excludes the cache.
+    for tokens in events
+        .iter()
+        .filter(|event| event["type"] == "step_finish")
+        .map(|event| &event["part"]["tokens"])
+        .filter(|tokens| tokens.is_object())
+    {
+        let entry = per_model.entry("opencode".into()).or_insert_with(|| ModelUsageEntry {
+            model: "opencode".into(),
+            ..Default::default()
+        });
+        entry.input_tokens += tokens["input"].as_i64().unwrap_or(0);
+        entry.output_tokens += tokens["output"].as_i64().unwrap_or(0) + tokens["reasoning"].as_i64().unwrap_or(0);
+        entry.cache_read_tokens += tokens["cache"]["read"].as_i64().unwrap_or(0);
+        entry.cache_creation_tokens += tokens["cache"]["write"].as_i64().unwrap_or(0);
     }
     for event in events
         .into_iter()

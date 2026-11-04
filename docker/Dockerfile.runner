@@ -13,7 +13,7 @@ ARG CARGO_PROFILE_RELEASE_OPT_LEVEL
 RUN --mount=type=cache,id=ocr-cargo-registry,target=/usr/local/cargo/registry,sharing=locked --mount=type=cache,id=${CARGO_TARGET_CACHE},target=/app/target,sharing=locked cargo build --locked --release --bin ocr-sandbox && cp /app/target/release/ocr-sandbox /usr/local/bin/ocr-sandbox
 
 FROM ${OCR_RUNTIME_IMAGE}
-RUN chmod -R a+rX /opt/claude /opt/codex
+RUN chmod -R a+rX /opt/claude /opt/codex /opt/opencode
 COPY --from=build /usr/local/bin/ocr-sandbox /usr/local/bin/ocr-sandbox
 WORKDIR /runner
 ENTRYPOINT ["ocr-sandbox"]

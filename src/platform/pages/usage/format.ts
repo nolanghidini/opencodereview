@@ -38,7 +38,7 @@ export function dayLabel(day: string) {
 /** Minutes east of UTC, as the API expects in `tz`. */
 export const timezoneOffset = (now = new Date()) => -now.getTimezoneOffset();
 
-const PROVIDERS: string[] = ["claude", "codex"] satisfies AiAccount["provider"][];
+const PROVIDERS: string[] = ["claude", "codex", "opencode"] satisfies AiAccount["provider"][];
 export const isProvider = (value: string | null): value is AiAccount["provider"] =>
   value !== null && PROVIDERS.includes(value);
 

@@ -21,7 +21,7 @@ from contextlib import contextmanager
 BENCH = pathlib.Path(__file__).resolve().parent.parent
 CACHE = pathlib.Path(os.environ.get("OCR_BENCH_CACHE", BENCH / "cache"))
 SHA = re.compile(r"^[0-9a-f]{40}$")
-PROVIDERS = ("claude", "codex")
+PROVIDERS = ("claude", "codex", "opencode")
 # Runners per pull request. Above 1 they run beside the review in containers of their own, as
 # Compose runs them, and the review's chunks run side by side.
 RUNNERS = int(os.environ.get("OCR_BENCH_RUNNERS", "1"))

@@ -84,6 +84,7 @@ pub(crate) fn seed_account(db: &Db, engine: &Engine, credential: &str) -> Result
     match engine.provider.as_str() {
         "claude" => crate::accounts::store_claude_token(account.id, credential)?,
         "codex" => crate::accounts::store_codex_auth(account.id, credential)?,
+        "opencode" => crate::accounts::store_opencode_auth(account.id, credential)?,
         _ => return Err("Unsupported provider".into()),
     }
     if engine.model.is_some() || engine.effort.is_some() {

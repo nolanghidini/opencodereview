@@ -123,6 +123,12 @@ export const setupApiAccess = {
     if (codexFlowSecret) headers["x-flow-secret"] = codexFlowSecret;
     return http<{ running: boolean }>("/auth/codex/cancel", { method: "POST", headers, body: JSON.stringify({}) });
   },
+  /** Saves an OpenCode Go key, or the free models when `key` is left out. */
+  opencodeKeySave: (key?: string, accountId?: number) =>
+    http<{ ok: boolean }>("/auth/opencode/key", {
+      method: "POST",
+      body: JSON.stringify({ ...(key ? { key } : {}), ...(accountId ? { accountId } : {}) }),
+    }),
   githubAuthLogout: () => http<{ ok: boolean }>("/auth/github/logout", { method: "POST", body: JSON.stringify({}) }),
   getSettings: () => http<Settings>("/settings"),
   saveSettingsBatch: (payload: {

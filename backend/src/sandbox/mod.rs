@@ -39,6 +39,7 @@ fn executor_fingerprint() -> String {
         include_bytes!("../review/integration/mod.rs").as_slice(),
         include_bytes!("../providers/claude.rs").as_slice(),
         include_bytes!("../providers/codex.rs").as_slice(),
+        include_bytes!("../providers/opencode.rs").as_slice(),
         include_bytes!("../indexer/mod.rs").as_slice(),
         include_bytes!("../review/scope.rs").as_slice(),
         include_bytes!("../review/policy.rs").as_slice(),

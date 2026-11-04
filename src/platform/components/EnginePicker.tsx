@@ -11,7 +11,7 @@ import { AccountChoices, AddAccount } from "./EngineAccounts";
 export const ENGINES_QUERY_KEY = ["review-engines"] as const;
 
 type Provider = AiAccount["provider"];
-const PROVIDERS: Provider[] = ["claude", "codex"];
+const PROVIDERS: Provider[] = ["claude", "codex", "opencode"];
 
 const effortLabel: Record<string, string> = {
   low: "Low",

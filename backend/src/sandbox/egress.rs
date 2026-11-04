@@ -123,8 +123,15 @@ fn relay(mut client: TcpStream, mut remote: TcpStream, idle: Duration) -> Result
 }
 
 /// Model providers runners may reach: Anthropic for Claude accounts; ChatGPT, the OpenAI API
-/// and OpenAI's sign-in refresh for Codex accounts. Private networks, and so local models, stay out.
-const PROVIDER_HOSTS: &[&str] = &["api.anthropic.com", "chatgpt.com", "api.openai.com", "auth.openai.com"];
+/// and OpenAI's sign-in refresh for Codex accounts; and OpenCode's own inference for OpenCode
+/// accounts. Private networks, and so local models, stay out.
+const PROVIDER_HOSTS: &[&str] = &[
+    "api.anthropic.com",
+    "chatgpt.com",
+    "api.openai.com",
+    "auth.openai.com",
+    "opencode.ai",
+];
 
 const MAX_CONNECTIONS: usize = 48;
 
@@ -285,7 +292,7 @@ mod tests {
         }
         assert!(destination("GET https://api.anthropic.com/ HTTP/1.1\r\n\r\n", &allowed).is_err());
         let providers = PROVIDER_HOSTS.iter().map(|host| host.to_string()).collect::<Vec<_>>();
-        for host in ["chatgpt.com", "api.openai.com", "auth.openai.com"] {
+        for host in ["chatgpt.com", "api.openai.com", "auth.openai.com", "opencode.ai"] {
             assert!(destination(&format!("CONNECT {host}:443 HTTP/1.1\r\n\r\n"), &providers).is_ok());
         }
         for host in [
@@ -297,7 +304,7 @@ mod tests {
             "unleash.codeium.com",
             "api.devin.ai",
             "server.codeium.com",
-            "opencode.ai",
+            "models.opencode.ai",
             "oauth2.googleapis.com",
             "cloudcode-pa.googleapis.com",
             "openrouter.ai",

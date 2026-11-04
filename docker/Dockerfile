@@ -67,6 +67,25 @@ RUN case "$TARGETARCH" in \
   && ln -s /opt/codex/bin/codex /usr/local/bin/codex \
   && test "$(/opt/codex/bin/codex --version | cut -d ' ' -f2)" = "$CODEX_CLI_VERSION"
 LABEL ai.codex.cli.version="${CODEX_CLI_VERSION}"
+ARG OPENCODE_CLI_VERSION=1.19.5
+ARG OPENCODE_CLI_SHA256_AMD64=588310a336fa3b9df36b3f0225b26f679d453efaad0cf3d66c3651ef3ec1647a
+ARG OPENCODE_CLI_SHA256_ARM64=fae5be262d693b7c5e562856cc473e59e741772936db0c0600ac0d5ed5bd088b
+RUN case "$TARGETARCH" in \
+      amd64) platform=linux-x64; checksum="$OPENCODE_CLI_SHA256_AMD64" ;; \
+      arm64) platform=linux-arm64; checksum="$OPENCODE_CLI_SHA256_ARM64" ;; \
+      *) echo "Unsupported OpenCode CLI architecture: $TARGETARCH" >&2; exit 1 ;; \
+    esac \
+  && curl -fsSL --retry 3 "https://github.com/anomalyco/opencode/releases/download/v${OPENCODE_CLI_VERSION}/opencode-${platform}.tar.gz" -o /tmp/opencode.tar.gz \
+  && printf '%s  /tmp/opencode.tar.gz\n' "$checksum" | sha256sum -c - \
+  && mkdir -p /opt/opencode/bin \
+  && tar -xzf /tmp/opencode.tar.gz -C /opt/opencode/bin \
+  && rm /tmp/opencode.tar.gz \
+  && chown -R root:root /opt/opencode \
+  && chmod 0755 /opt/opencode/bin/opencode \
+  && ln -s /opt/opencode/bin/opencode /usr/local/bin/opencode \
+  && test "$(HOME=/tmp/opencode-home XDG_DATA_HOME=/tmp/opencode-home XDG_CONFIG_HOME=/tmp/opencode-home XDG_CACHE_HOME=/tmp/opencode-home XDG_STATE_HOME=/tmp/opencode-home /opt/opencode/bin/opencode --version)" = "$OPENCODE_CLI_VERSION" \
+  && rm -rf /tmp/opencode-home
+LABEL ai.opencode.cli.version="${OPENCODE_CLI_VERSION}"
 ENV DISABLE_AUTOUPDATER=1
 WORKDIR /app
 COPY --from=server /app/assets ./assets
