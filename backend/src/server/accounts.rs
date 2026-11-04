@@ -85,6 +85,23 @@ pub(crate) fn cli_version(output: &str) -> Option<String> {
 }
 
 /// Each provider's model and effort choices and the ones reviews use now.
+/// The model of the OpenCode account reviews try first (enabled, signed in, by priority), without
+/// its plan prefix.
+fn opencode_account_model(accounts: &[crate::db::AiAccount]) -> Option<String> {
+    accounts
+        .iter()
+        .filter(|account| account.provider == "opencode" && account.enabled && account.status != "auth_failed")
+        .find_map(|account| {
+            let raw = std::fs::read_to_string(crate::accounts::opencode_auth_path(account.id)).ok()?;
+            let (_, _, model) = crate::providers::opencode::parts(&raw)?;
+            Some(
+                model
+                    .split_once('/')
+                    .map_or(model.clone(), |(_, name)| name.to_string()),
+            )
+        })
+}
+
 pub(crate) fn review_engines(state: &SharedState) -> Result<serde_json::Value, String> {
     use crate::providers::engines;
     with_db_read_raw(state, |db| {
@@ -92,12 +109,18 @@ pub(crate) fn review_engines(state: &SharedState) -> Result<serde_json::Value, S
             .iter()
             .map(|(provider, name)| {
                 let (model, effort) = db.review_engine(provider)?;
+                // OpenCode's model belongs to the account: name the one the next review runs on.
+                let account_model = if *provider == "opencode" {
+                    opencode_account_model(&db.list_ai_accounts()?)
+                } else {
+                    None
+                };
                 let models = engines::models(provider)
                     .iter()
                     .map(|entry| {
                         serde_json::json!({
                             "id": entry.id,
-                            "label": entry.label,
+                            "label": account_model.as_deref().unwrap_or(entry.label),
                             "efforts": entry.efforts,
                             "defaultEffort": entry.default_effort,
                         })
@@ -108,7 +131,9 @@ pub(crate) fn review_engines(state: &SharedState) -> Result<serde_json::Value, S
                     "name": name,
                     "model": model,
                     "effort": effort,
-                    "label": engines::label(provider, &model, &effort),
+                    "label": account_model
+                        .as_deref()
+                        .map_or_else(|| engines::label(provider, &model, &effort), |model| format!("{name} · {model}")),
                     "models": models,
                 }))
             })

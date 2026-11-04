@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { friendlyError, OpencodeModelSelect } from "../../components/AccessConnect";
 import { setupApi } from "../../services/setupApi";
 import type { AiAccount } from "../../types";
+import { ENGINES_QUERY_KEY } from "./EnginePicker";
 
 /** One OpenCode account's model, picked from the models OpenCode offers its key or plan. */
 function AccountModel({ account }: { account: AiAccount }) {
@@ -15,7 +16,11 @@ function AccountModel({ account }: { account: AiAccount }) {
   });
   const save = useMutation({
     mutationFn: (model: string) => setupApi.opencodeKeySave(undefined, account.id, model),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey });
+      // The top bar names the model the next review runs on.
+      void queryClient.invalidateQueries({ queryKey: ENGINES_QUERY_KEY });
+    },
   });
   const error = save.error ?? models.error;
   return (

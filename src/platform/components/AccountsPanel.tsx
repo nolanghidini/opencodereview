@@ -355,6 +355,8 @@ export function AccountsPanel({ provider }: { provider?: Provider } = {}) {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ACCOUNTS_QUERY_KEY });
     void queryClient.invalidateQueries({ queryKey: ["setup"] });
+    // ENGINES_QUERY_KEY: an OpenCode account's model names the engine the top bar shows.
+    void queryClient.invalidateQueries({ queryKey: ["review-engines"] });
   };
   const settle = {
     onSuccess: (accounts: AiAccount[]) => {
