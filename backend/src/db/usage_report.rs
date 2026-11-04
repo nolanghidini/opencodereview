@@ -269,8 +269,8 @@ pub(crate) fn run_outcome(status: &str, published: bool) -> &'static str {
     }
 }
 
-/// The provider behind a model name recorded before accounts were attributed. Gemini and
-/// OpenCode are no longer offered, but their past runs keep their provider.
+/// The provider behind a model name recorded before accounts were attributed. Gemini is no longer
+/// offered, but its past runs keep their provider.
 fn provider_of_model(model: &str) -> Option<&'static str> {
     if model.starts_with("claude") {
         Some("claude")

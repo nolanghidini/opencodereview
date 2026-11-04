@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
-import { ClaudeSignIn, ClaudeTokenSignIn, CodexSignIn } from "../../components/AccessConnect";
+import { ClaudeSignIn, ClaudeTokenSignIn, CodexSignIn, OpencodeKeySignIn } from "../../components/AccessConnect";
 import { cx } from "../../components/DesignSystem";
 import type { AiAccount, UsageWindow } from "../../types";
 import {
@@ -125,7 +125,7 @@ export function AddAccount({ onDone, onCancel }: { onDone: (provider: Provider) 
       </div>
       {!choice ? (
         <div className="flex flex-col gap-1.5">
-          {(["claude", "codex"] as const).map((provider) => (
+          {(["claude", "codex", "opencode"] as const).map((provider) => (
             <button
               key={provider}
               type="button"
@@ -135,7 +135,7 @@ export function AddAccount({ onDone, onCancel }: { onDone: (provider: Provider) 
               <ProviderGlyph provider={provider} />
               {providerName[provider]}
               <span className="ml-auto text-caption font-normal text-fg-subtle">
-                {provider === "claude" ? "Pro, Max or Team" : "Plus or Pro"}
+                {provider === "claude" ? "Pro, Max or Team" : provider === "codex" ? "Plus or Pro" : "Free or Go key"}
               </span>
             </button>
           ))}
@@ -144,22 +144,26 @@ export function AddAccount({ onDone, onCancel }: { onDone: (provider: Provider) 
         <>
           {choice.provider === "codex" ? (
             <CodexSignIn mode={choice.alternative ? "device" : "browser"} onDone={done} onCancel={back} />
+          ) : choice.provider === "opencode" ? (
+            <OpencodeKeySignIn onDone={done} onCancel={back} />
           ) : choice.alternative ? (
             <ClaudeTokenSignIn onDone={done} onCancel={back} />
           ) : (
             <ClaudeSignIn onDone={done} onCancel={back} />
           )}
-          <button
-            type="button"
-            className="cursor-pointer self-start text-caption text-fg-subtle underline-offset-2 hover:text-fg hover:underline"
-            onClick={() => setChoice({ ...choice, alternative: !choice.alternative })}
-          >
-            {choice.alternative
-              ? `Sign in to ${providerName[choice.provider]} in the browser instead`
-              : choice.provider === "claude"
-                ? "Paste a token from claude setup-token instead"
-                : "Sign in with a one-time code instead"}
-          </button>
+          {choice.provider !== "opencode" && (
+            <button
+              type="button"
+              className="cursor-pointer self-start text-caption text-fg-subtle underline-offset-2 hover:text-fg hover:underline"
+              onClick={() => setChoice({ ...choice, alternative: !choice.alternative })}
+            >
+              {choice.alternative
+                ? `Sign in to ${providerName[choice.provider]} in the browser instead`
+                : choice.provider === "claude"
+                  ? "Paste a token from claude setup-token instead"
+                  : "Sign in with a one-time code instead"}
+            </button>
+          )}
         </>
       )}
     </div>

@@ -31,6 +31,10 @@ pub(crate) fn sync_app_auth() -> Result<(), String> {
             &crate::accounts::codex_auth_path(*id),
             &target.join(format!("accounts/{id}/codex/auth.json")),
         )?;
+        mirror(
+            &crate::accounts::opencode_auth_path(*id),
+            &target.join(format!("accounts/{id}/opencode/auth.json")),
+        )?;
     }
     if let Ok(entries) = fs::read_dir(target.join("accounts")) {
         for entry in entries.flatten() {

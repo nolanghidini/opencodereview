@@ -6,12 +6,14 @@ import { setupApi } from "../../services/setupApi";
 import type { AiAccount, ReviewEngine } from "../../types";
 import { ACCOUNTS_QUERY_KEY, AccountsPanel, accountHealth, ProviderGlyph, providerName } from "./AccountsPanel";
 import { ENGINES_QUERY_KEY } from "./EnginePicker";
+import { OpencodeAccountModels } from "./OpencodeAccountModels";
 
 type Provider = AiAccount["provider"];
-const PROVIDERS: Provider[] = ["claude", "codex"];
+const PROVIDERS: Provider[] = ["claude", "codex", "opencode"];
 const planHint: Record<Provider, string> = {
   claude: "Claude Pro, Max or Team plan",
   codex: "ChatGPT Plus or Pro plan",
+  opencode: "Free models, or an OpenCode Go key",
 };
 
 const groupClass = "flex flex-col overflow-hidden rounded-xl border border-line/70 bg-surface";
@@ -210,7 +212,11 @@ function ProviderDetail({
             <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div>
                 <div className="text-small font-medium text-fg">Model</div>
-                <div className="text-caption text-fg-subtle">The model reviews run on with this provider.</div>
+                <div className="text-caption text-fg-subtle">
+                  {provider === "opencode"
+                    ? "Each OpenCode account keeps its own model, from the ones OpenCode offers its key."
+                    : "The model reviews run on with this provider."}
+                </div>
               </div>
               {engine.models.length > 1 && (
                 <select
@@ -234,6 +240,7 @@ function ProviderDetail({
                 </select>
               )}
             </div>
+            {provider === "opencode" && <OpencodeAccountModels accounts={accounts} />}
             {model && model.efforts.length > 0 && (
               <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                 <div>

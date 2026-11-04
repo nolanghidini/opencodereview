@@ -19,6 +19,7 @@ interface ShareCardData {
 const PROVIDER_NAMES: Record<string, string> = {
   claude: "Claude",
   codex: "Codex",
+  opencode: "OpenCode",
 };
 
 export function shareCardData(report: UsageReport): ShareCardData {

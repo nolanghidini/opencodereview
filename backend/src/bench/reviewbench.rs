@@ -71,7 +71,7 @@ pub fn run_from_env() -> Result<(), String> {
         model: env("RB_CONFIG_MODEL"),
         effort: env("RB_CONFIG_EFFORT"),
     };
-    if !matches!(engine.provider.as_str(), "claude" | "codex") {
+    if !matches!(engine.provider.as_str(), "claude" | "codex" | "opencode") {
         return Err(format!("Unsupported RB_CONFIG_PROVIDER {}", engine.provider));
     }
     let deadline = Duration::from_secs(

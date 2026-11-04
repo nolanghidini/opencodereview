@@ -35,7 +35,7 @@ Configuration, read from the contract's `RB_CONFIG_*` variables:
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `RB_CONFIG_PROVIDER` | `claude` | `claude` or `codex`. It seeds the run's only account, so a review never fails over to another provider. |
+| `RB_CONFIG_PROVIDER` | `claude` | `claude`, `codex` or `opencode`. It seeds the run's only account, so a review never fails over to another provider. |
 | `RB_CONFIG_MODEL`, `RB_CONFIG_EFFORT` | the product defaults | Overrides the provider's engine choice for benchmark runs; must be a model and effort listed in `backend/src/providers/engines.rs` |
 | `RB_CONFIG_DEADLINE_SECS` | 1500 | After this many seconds the review is cancelled. Two minutes before it, the review's time budget ends: the lens, output repairs and final integration batches start only while the chunk reviews and integration still required fit. Without time, a repair's invalid findings are dropped and a final batch keeps its chunk-validated findings, marked unconfirmed. The manifests set 3300 against ReviewBench's 60-minute limit. |
 | `RB_CONFIG_MAX_FILES` | 800 | Settings → PR selection → Maximum PR files. The product defaults to 100; a pull request it declines scores nothing, so the benchmark allows more. |

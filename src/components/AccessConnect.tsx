@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { setupApi } from "../services/setupApi";
+import type { OpencodeModels } from "../types";
 import { BrandLoadingIcon } from "./BrandLoading";
 
 const secondaryButton =
@@ -266,6 +267,127 @@ function PasteCodeSignIn({
 /** Signs in to Claude right away, saving the token to `accountId` or to a new account. */
 export function ClaudeSignIn(props: { accountId?: number; onDone: () => void; onCancel: () => void }) {
   return <PasteCodeSignIn api={claudeApi} plan="Uses your Claude Pro, Max or Team plan." {...props} />;
+}
+
+const selectInput =
+  "h-9 min-w-0 flex-1 basis-56 cursor-pointer rounded-lg border border-line bg-surface px-3 text-small text-fg outline-none focus:border-brand focus:ring-3 focus:ring-brand/15 disabled:cursor-not-allowed disabled:opacity-50";
+
+/** The models OpenCode offers to a key, an account or the free plan, as a dropdown. */
+export function OpencodeModelSelect({
+  models,
+  value,
+  disabled,
+  onChange,
+}: {
+  models: OpencodeModels["models"];
+  value: string;
+  disabled?: boolean;
+  onChange: (model: string) => void;
+}) {
+  return (
+    <select
+      aria-label="OpenCode model"
+      className={selectInput}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      {models.map((model) => (
+        <option key={model.id} value={model.id}>
+          {model.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/** Connects OpenCode, to `accountId` or to a new account. A pasted Go key is checked with
+ * OpenCode, which answers with the models it unlocks; the free models need no key. Either way
+ * the account is saved with the model picked from that list. */
+export function OpencodeKeySignIn({
+  accountId,
+  onDone,
+  onCancel,
+}: {
+  accountId?: number;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [key, setKey] = useState("");
+  const [model, setModel] = useState("");
+  const check = useMutation({
+    mutationFn: (withKey: boolean) => setupApi.opencodeModels(withKey ? key.trim() : undefined),
+    onSuccess: (list) =>
+      setModel(list.models.some((item) => item.id === list.current) ? list.current : (list.models[0]?.id ?? "")),
+  });
+  const list = check.data;
+  const save = useMutation({
+    mutationFn: () =>
+      setupApi.opencodeKeySave(list?.plan === "opencode-go" ? key.trim() : undefined, accountId, model || undefined),
+    onSuccess: onDone,
+  });
+  const error = save.error ?? check.error;
+  const problems = error && <Problem>{friendlyError(error)}</Problem>;
+  if (list)
+    return (
+      <SignInFrame
+        hint={
+          list.plan === "opencode-go"
+            ? `OpenCode accepted the key: ${list.models.length} models. Pick the one reviews run on.`
+            : `${list.models.length} free models. Pick the one reviews run on.`
+        }
+        problems={problems}
+      >
+        <form
+          className="flex flex-wrap items-center gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            save.mutate();
+          }}
+        >
+          <OpencodeModelSelect models={list.models} value={model} disabled={save.isPending} onChange={setModel} />
+          <button type="submit" className={brandButton} disabled={!model || save.isPending}>
+            {save.isPending ? "Saving…" : "Save"}
+          </button>
+          <button type="button" className={quietButton} disabled={save.isPending} onClick={() => check.reset()}>
+            Back
+          </button>
+        </form>
+      </SignInFrame>
+    );
+  return (
+    <SignInFrame hint="Free models need no account. A key unlocks the paid Go models." problems={problems}>
+      <form
+        className="flex flex-wrap items-center gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          check.mutate(true);
+        }}
+      >
+        <input
+          aria-label="OpenCode Go key"
+          type="password"
+          className={codeInput}
+          value={key}
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="Paste your OpenCode Go key"
+          onChange={(event) => setKey(event.target.value)}
+        />
+        <button type="submit" className={brandButton} disabled={!key.trim() || check.isPending}>
+          {check.isPending && check.variables ? "Checking the key…" : "Check key"}
+        </button>
+      </form>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <button type="button" className={quietButton} disabled={check.isPending} onClick={() => check.mutate(false)}>
+          {check.isPending && !check.variables ? "Loading free models…" : "Use free models"}
+        </button>
+        <button type="button" className={quietButton} onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </SignInFrame>
+  );
 }
 
 /** Pastes a token made with `claude setup-token`, saving it to `accountId` or to a new account. */

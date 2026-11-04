@@ -7,6 +7,7 @@ import {
   CodexSignIn,
   CopyCode,
   friendlyError,
+  OpencodeKeySignIn,
   useGithubFlow,
 } from "../components/AccessConnect";
 import { BrandLoadingIcon } from "../components/BrandLoading";
@@ -139,6 +140,7 @@ type SignIn = { provider: AiProvider["provider"]; method: "oauth" | "code" };
 const planDetail: Record<AiProvider["provider"], string> = {
   claude: "Pro, Max or Team plan",
   codex: "ChatGPT Plus or Pro plan",
+  opencode: "Free models, or your Go key",
 };
 
 /** The second way into each provider, offered from the row's menu. */
@@ -157,6 +159,12 @@ const alternative: Record<
     hint: "Enter a one-time code on any device",
     icon: <Smartphone />,
     method: "code",
+  },
+  opencode: {
+    label: "Add an OpenCode Go key",
+    hint: "Unlocks the paid Go models",
+    icon: <KeyRound />,
+    method: "oauth",
   },
 };
 
@@ -266,6 +274,8 @@ export function PlanStep({ onBack, onContinue }: { onBack: () => void; onContinu
                       onDone={finish}
                       onCancel={() => setSignIn(null)}
                     />
+                  ) : provider.provider === "opencode" ? (
+                    <OpencodeKeySignIn onDone={finish} onCancel={() => setSignIn(null)} />
                   ) : open.method === "code" ? (
                     <ClaudeTokenSignIn onDone={finish} onCancel={() => setSignIn(null)} />
                   ) : (

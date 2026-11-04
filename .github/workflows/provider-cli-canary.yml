@@ -1,12 +1,13 @@
 name: Provider CLI canary
 
-# The image pins each AI CLI (docker/Dockerfile). This run builds it with the newest Claude Code
-# and Codex releases instead, so a release that breaks reviews shows up before anyone bumps a pin:
-# the install and version checks in the Dockerfile, every flag the providers pass, and the runner
-# sandbox smoke. It needs no account and calls no model (docker/provider-cli-canary.py).
+# The image pins each AI CLI (docker/Dockerfile). This run builds it with the newest Claude Code,
+# Codex and OpenCode releases instead, so a release that breaks reviews shows up before
+# anyone bumps a pin: the install and version checks in the Dockerfile, every flag the providers
+# pass, the runner sandbox smoke, and one real prompt on OpenCode's free model. It needs no
+# account and makes no paid call (docker/provider-cli-canary.py).
 #
-# The `alert` job opens one issue on the second failed run in a row, because a release download
-# can fail once, and closes it after a run that passes.
+# The `alert` job opens one issue on the second failed run in a row, because a free model can be
+# busy for one run, and closes it after a run that passes.
 on:
   schedule:
     - cron: "17 */6 * * *"
@@ -50,6 +51,9 @@ jobs:
 
       - name: Runner sandbox smoke
         run: python3 -u docker/runner-smoke.py
+
+      - name: One prompt on OpenCode's free model
+        run: python3 -B docker/provider-cli-canary.py opencode opencodereview-server:canary
 
   alert:
     name: Report a failed canary

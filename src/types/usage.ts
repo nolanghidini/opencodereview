@@ -50,7 +50,7 @@ export interface UsageGroupRow extends UsageTokens {
   /** Stable key; `unattributed` for tokens no repository, model or account accounts for. */
   key: string;
   label: string;
-  /** Provider id (`claude` or `codex`) for model and account rows. */
+  /** Provider id (`claude`, `codex` or `opencode`) for model and account rows. */
   provider: string | null;
   runs: number;
   /** Repositories only: findings published, and kept whether published or not. */

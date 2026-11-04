@@ -33,7 +33,7 @@ export interface Settings {
 
 export interface AiAccount {
   id: number;
-  provider: "claude" | "codex";
+  provider: "claude" | "codex" | "opencode";
   label: string;
   priority: number;
   enabled: boolean;
@@ -46,6 +46,14 @@ export interface AiAccount {
 }
 
 /** A model a provider can review with, and the reasoning efforts it takes. */
+/** The models an OpenCode key, account or the free plan may use, and the one it uses now. */
+export interface OpencodeModels {
+  plan: "opencode-go" | "opencode";
+  current: string;
+  default: string;
+  models: { id: string; label: string }[];
+}
+
 export interface EngineModel {
   id: string;
   label: string;
